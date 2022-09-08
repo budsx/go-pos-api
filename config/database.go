@@ -7,7 +7,7 @@ import (
 )
 
 func NewConnection() *gorm.DB {
-	db, err := gorm.Open(postgres.Open("postgres://postgres:21799@localhost:5432/go-pos-api?sslmode=disable"), &gorm.Config{})
+	db, err := gorm.Open(postgres.Open("postgres://postgres:postgres@localhost:5432/go-pos-api?sslmode=disable"), &gorm.Config{})
 	if err != nil {
 		panic(err)
 	}

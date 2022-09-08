@@ -11,7 +11,7 @@ func main() {
 	router := gin.Default()
 	router.GET("/hello", func(c *gin.Context) {
 		c.JSON(200, gin.H{
-			"message": "Hello World",
+			"message": "Connect Server with Gin Gonic",
 		})
 	})
 
