@@ -7,6 +7,7 @@ import (
 
 type OrderService interface {
 	GetAllOrder() []dto.OrderResponse
+	GetOrderByID(id int) dto.OrderResponse
 }
 
 type orderService struct {
@@ -32,4 +33,19 @@ func (service *orderService) GetAllOrder() []dto.OrderResponse {
 		})
 	}
 	return orderResponses
+}
+
+func (service *orderService) GetOrderByID(id int) dto.OrderResponse {
+	order, err := service.orderRepository.GetOrderByID(id)
+	if err != nil {
+		return dto.OrderResponse{}
+	}
+	return dto.OrderResponse{
+		OrderID:      order.OrderID,
+		UserID:       order.UserID,
+		CustomerName: order.CustomerName,
+		Amount:       order.Amount,
+		CreatedAt:    order.CreatedAt,
+		UpdatedAt:    order.UpdatedAt,
+	}
 }
