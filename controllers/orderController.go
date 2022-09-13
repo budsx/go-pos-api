@@ -29,11 +29,13 @@ func (controller *orderController) GetAllOrder(c *gin.Context) {
 }
 
 func (controller *orderController) GetOrderByID(c *gin.Context) {
-	id, err := strconv.Atoi(c.Param("order_id"))
+	id, _ := strconv.Atoi(c.Param("order_id"))
+	order, err := controller.orderService.GetOrderByID(id)
 	if err != nil {
-		panic(err)
+		response := helpers.APIResponse("Get Order Detail", http.StatusBadRequest, "Order Not Found", nil)
+		c.JSON(http.StatusBadRequest, response)
+	} else {
+		response := helpers.APIResponse("Get Order Detail", http.StatusOK, "Success", order)
+		c.JSON(http.StatusOK, response)
 	}
-	order := controller.orderService.GetOrderByID(id)
-	response := helpers.APIResponse("Get Order Detail", http.StatusOK, "Success", order)
-	c.JSON(http.StatusOK, response)
 }
