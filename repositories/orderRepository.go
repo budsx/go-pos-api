@@ -1,15 +1,15 @@
 package repositories
 
 import (
-	"errors"
 	"go-pos-api/domain"
+	"go-pos-api/helpers"
 
 	"gorm.io/gorm"
 )
 
 type OrderRepository interface {
 	GetAllOrder() []domain.Order
-	GetOrderByID(id int) (domain.Order, error)
+	GetOrderByID(id int) (domain.Order, *helpers.AppError)
 }
 
 type orderRepository struct {
@@ -26,11 +26,11 @@ func (repository *orderRepository) GetAllOrder() []domain.Order {
 	return orders
 }
 
-func (repository *orderRepository) GetOrderByID(id int) (domain.Order, error){
+func (repository *orderRepository) GetOrderByID(id int) (domain.Order, *helpers.AppError) {
 	var order domain.Order
 	repository.db.First(&order, id)
 	if order.OrderID == 0 {
-		return order, errors.New("Order Not Found")
+		return order, helpers.NewNotFoundError("Order Not Found")
 	} else {
 		return order, nil
 	}

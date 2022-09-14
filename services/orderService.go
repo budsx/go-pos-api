@@ -1,14 +1,14 @@
 package services
 
 import (
-	"errors"
 	"go-pos-api/dto"
+	"go-pos-api/helpers"
 	"go-pos-api/repositories"
 )
 
 type OrderService interface {
 	GetAllOrder() []dto.OrderResponse
-	GetOrderByID(id int) (dto.OrderResponse, error)
+	GetOrderByID(id int) (dto.OrderResponse, *helpers.AppError)
 }
 
 type orderService struct {
@@ -36,10 +36,10 @@ func (service *orderService) GetAllOrder() []dto.OrderResponse {
 	return orderResponses
 }
 
-func (service *orderService) GetOrderByID(id int) (dto.OrderResponse, error) {
+func (service *orderService) GetOrderByID(id int) (dto.OrderResponse, *helpers.AppError) {
 	order, err := service.orderRepository.GetOrderByID(id)
 	if err != nil {
-		return dto.OrderResponse{}, errors.New("Order not found")
+		return dto.OrderResponse{}, helpers.NewUnexpectedError("Internal Server Error")
 	}
 	return dto.OrderResponse{
 		OrderID:      order.OrderID,
