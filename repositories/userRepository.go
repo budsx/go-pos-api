@@ -8,8 +8,7 @@ import (
 )
 
 type UserRepositoryDB interface {
-	Register(domain.User) (domain.User, error)
-	Login(string) (domain.User, error)
+	RegisterUser(domain.User) (domain.User, *helpers.AppError)
 }
 
 type userRepositoryDB struct {
@@ -20,21 +19,11 @@ func NewUserRepository(db *gorm.DB) *userRepositoryDB {
 	return &userRepositoryDB{db}
 }
 
-func (repo *userRepositoryDB) Register(user domain.User) (domain.User, error) {
+func (repository *userRepositoryDB) RegisterUser(user domain.User) (domain.User, *helpers.AppError) {
 	var err error
-	if err = repo.db.Create(&user).Error; err != nil {
+	if err = repository.db.Create(&user).Error; err != nil {
 		helpers.Error("Unexpected Error: " + err.Error())
-		return user, nil
-	}
-	return user, nil
-}
-
-func (repo *userRepositoryDB) Login(email string) (domain.User, error) {
-	var user domain.User
-	var err error
-	if err = repo.db.Where("email = ?", email).Find(&user).Error; err != nil {
-		helpers.Error("Unexpected Error: " + err.Error())
-		return user, err
+		return user, helpers.NewUnexpectedError("unexpected error")
 	}
 	return user, nil
 }
