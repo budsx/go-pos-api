@@ -1,6 +1,7 @@
 package controllers
 
 import (
+	"fmt"
 	"go-pos-api/dto"
 	"go-pos-api/helpers"
 	"go-pos-api/services"
@@ -14,6 +15,7 @@ type ProductController interface {
 	GetAllProduct(c *gin.Context)
 	GetProductById(c *gin.Context)
 	CreateProduct(c *gin.Context)
+	DeleteProductById(c *gin.Context)
 }
 
 type productController struct {
@@ -64,4 +66,18 @@ func (controller *productController) CreateProduct(c *gin.Context) {
 	}
 	response := helpers.APIResponse("Create Product Success", http.StatusCreated, "success", product)
 	c.JSON(http.StatusCreated, response)
+}
+
+func (controller *productController) DeleteProductById(c *gin.Context) {
+	productIdString := c.Param("product_id")
+	productId, _ := strconv.Atoi(productIdString)
+	_, err := controller.productService.DeleteProductById(productId)
+	if err != nil {
+		fmt.Println("TEST ERROR")
+		response := helpers.APIResponse("Something went wrong", http.StatusInternalServerError, "error", nil)
+		c.JSON(http.StatusInternalServerError, response)
+		return
+	}
+	response := helpers.APIResponse("Success delete Product", http.StatusOK, "success", nil)
+	c.JSON(http.StatusOK, response)
 }

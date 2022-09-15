@@ -11,6 +11,7 @@ type ProductRepository interface {
 	GetAllProduct() ([]domain.Product, *helpers.AppError)
 	GetProductById(int) (domain.Product, *helpers.AppError)
 	CreateProduct(domain.Product) (domain.Product, *helpers.AppError)
+	DeleteProductById(int) (domain.Product, *helpers.AppError)
 }
 
 type productRepository struct {
@@ -46,6 +47,16 @@ func (repository *productRepository) CreateProduct(product domain.Product) (doma
 	if err = repository.db.Create(&product).Error; err != nil {
 		helpers.Error("unexpected error" + err.Error())
 		return product, helpers.NewUnexpectedError("unexpected error")
+	}
+	return product, nil
+}
+
+func (repository *productRepository) DeleteProductById(id int) (domain.Product, *helpers.AppError) {
+	var err error
+	product := domain.Product{}
+	if err = repository.db.Where("product_id = ?", id).Delete(&product).Error; err != nil {
+		helpers.Error("Unexpected error" + err.Error())
+		return product, helpers.NewUnexpectedError("Unexpected error" + err.Error())
 	}
 	return product, nil
 }
