@@ -9,6 +9,7 @@ import (
 
 type ProductRepository interface {
 	GetAllProduct() ([]domain.Product, *helpers.AppError)
+	GetProductById(int) (domain.Product, *helpers.AppError)
 }
 
 type productRepository struct {
@@ -27,4 +28,14 @@ func (repository *productRepository) GetAllProduct() ([]domain.Product, *helpers
 		return products, helpers.NewUnexpectedError("unExpected error" + err.Error())
 	}
 	return products, nil
+}
+
+func (repository *productRepository) GetProductById(id int) (domain.Product, *helpers.AppError) {
+	var err error
+	var product domain.Product
+	if err = repository.db.Where("product_id = ?", id).Find(&product).Error; err != nil {
+		helpers.Error("error db" + err.Error())
+		return product, helpers.NewUnexpectedError("unExpected error" + err.Error())
+	}
+	return product, nil
 }
