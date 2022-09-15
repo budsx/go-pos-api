@@ -12,6 +12,7 @@ type ProductService interface {
 	GetProductById(int) (dto.ProductResponse, *helpers.AppError)
 	CreateProduct(dto.ProductRequest) (dto.ProductResponse, *helpers.AppError)
 	DeleteProductById(int) (domain.Product, *helpers.AppError)
+	UpdateProductById(dto.ProductRequest, int) (dto.ProductResponse, *helpers.AppError)
 }
 
 type productService struct {
@@ -84,4 +85,25 @@ func (service *productService) DeleteProductById(id int) (domain.Product, *helpe
 		return product, err
 	}
 	return product, nil
+}
+
+func (service *productService) UpdateProductById(input dto.ProductRequest, id int) (dto.ProductResponse, *helpers.AppError) {
+	product := domain.Product{}
+	product.ID = id
+	product.MerchantId = input.MerchantId
+	product.Name = input.Name
+	product.Price = input.Price
+	product.Stock = input.Stock
+	productResponse := dto.ProductResponse{}
+
+	updatedProduct, err := service.productService.UpdateProductById(product, id)
+	productResponse.ID = id
+	productResponse.MerchantId = updatedProduct.MerchantId
+	productResponse.Name = updatedProduct.Name
+	productResponse.Price = updatedProduct.Price
+	productResponse.Stock = updatedProduct.Stock
+	if err != nil {
+		return productResponse, err
+	}
+	return productResponse, nil
 }

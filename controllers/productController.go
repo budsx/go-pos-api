@@ -1,7 +1,6 @@
 package controllers
 
 import (
-	"fmt"
 	"go-pos-api/dto"
 	"go-pos-api/helpers"
 	"go-pos-api/services"
@@ -16,6 +15,7 @@ type ProductController interface {
 	GetProductById(c *gin.Context)
 	CreateProduct(c *gin.Context)
 	DeleteProductById(c *gin.Context)
+	UpdateProductById(c *gin.Context)
 }
 
 type productController struct {
@@ -73,11 +73,30 @@ func (controller *productController) DeleteProductById(c *gin.Context) {
 	productId, _ := strconv.Atoi(productIdString)
 	_, err := controller.productService.DeleteProductById(productId)
 	if err != nil {
-		fmt.Println("TEST ERROR")
 		response := helpers.APIResponse("Something went wrong", http.StatusInternalServerError, "error", nil)
 		c.JSON(http.StatusInternalServerError, response)
 		return
 	}
 	response := helpers.APIResponse("Success delete Product", http.StatusOK, "success", nil)
+	c.JSON(http.StatusOK, response)
+}
+
+func (controller *productController) UpdateProductById(c *gin.Context) {
+	productIdString := c.Param("product_id")
+	productId, _ := strconv.Atoi(productIdString)
+	var input dto.ProductRequest
+	errShouldBindJSON := c.ShouldBindJSON(&input)
+	if errShouldBindJSON != nil {
+		response := helpers.APIResponse("Something went wrong", http.StatusInternalServerError, "error", nil)
+		c.JSON(http.StatusInternalServerError, response)
+		return
+	}
+	updatedProduct, err := controller.productService.UpdateProductById(input, productId)
+	if err != nil {
+		response := helpers.APIResponse("Something went wrong", http.StatusInternalServerError, "error", nil)
+		c.JSON(http.StatusInternalServerError, response)
+		return
+	}
+	response := helpers.APIResponse("Success Updated product", http.StatusOK, "success", updatedProduct)
 	c.JSON(http.StatusOK, response)
 }

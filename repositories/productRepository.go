@@ -12,6 +12,7 @@ type ProductRepository interface {
 	GetProductById(int) (domain.Product, *helpers.AppError)
 	CreateProduct(domain.Product) (domain.Product, *helpers.AppError)
 	DeleteProductById(int) (domain.Product, *helpers.AppError)
+	UpdateProductById(domain.Product, int) (domain.Product, *helpers.AppError)
 }
 
 type productRepository struct {
@@ -57,6 +58,14 @@ func (repository *productRepository) DeleteProductById(id int) (domain.Product, 
 	if err = repository.db.Where("product_id = ?", id).Delete(&product).Error; err != nil {
 		helpers.Error("Unexpected error" + err.Error())
 		return product, helpers.NewUnexpectedError("Unexpected error" + err.Error())
+	}
+	return product, nil
+}
+
+func (repository *productRepository) UpdateProductById(product domain.Product, id int) (domain.Product, *helpers.AppError) {
+	var err error
+	if err = repository.db.Model(&product).Where("product_id = ?", id).Updates(product).Error; err != nil {
+		return product, helpers.NewUnexpectedError("un expected error" + err.Error())
 	}
 	return product, nil
 }
