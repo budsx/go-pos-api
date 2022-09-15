@@ -1,6 +1,7 @@
 package controllers
 
 import (
+	"go-pos-api/dto"
 	"go-pos-api/helpers"
 	"go-pos-api/services"
 	"net/http"
@@ -12,6 +13,7 @@ import (
 type OrderController interface {
 	GetAllOrder(c *gin.Context)
 	GetOrderByID(c *gin.Context)
+	CreateOrder(c *gin.Context)
 }
 
 type orderController struct {
@@ -38,4 +40,11 @@ func (controller *orderController) GetOrderByID(c *gin.Context) {
 		response := helpers.APIResponse("Get Order Detail", http.StatusOK, "Success", order)
 		c.JSON(http.StatusOK, response)
 	}
+}
+
+func (controller *orderController) CreateOrder(c *gin.Context) {
+	var order dto.OrderRequest
+	c.ShouldBindJSON(&order)
+	controller.orderService.CreateOrder(order)
+	c.JSON(200, order)
 }

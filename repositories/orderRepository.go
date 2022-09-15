@@ -10,6 +10,7 @@ import (
 type OrderRepository interface {
 	GetAllOrder() []domain.Order
 	GetOrderByID(id int) (domain.Order, *helpers.AppError)
+	CreateOrder(order domain.Order) domain.Order
 }
 
 type orderRepository struct {
@@ -34,4 +35,9 @@ func (repository *orderRepository) GetOrderByID(id int) (domain.Order, *helpers.
 	} else {
 		return order, nil
 	}
+}
+
+func (repository *orderRepository) CreateOrder(order domain.Order) domain.Order {
+	repository.db.Create(&order)
+	return order
 }

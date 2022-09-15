@@ -1,6 +1,7 @@
 package services
 
 import (
+	"go-pos-api/domain"
 	"go-pos-api/dto"
 	"go-pos-api/helpers"
 	"go-pos-api/repositories"
@@ -9,6 +10,7 @@ import (
 type OrderService interface {
 	GetAllOrder() []dto.OrderResponse
 	GetOrderByID(id int) (dto.OrderResponse, *helpers.AppError)
+	CreateOrder(request dto.OrderRequest) dto.OrderResponse
 }
 
 type orderService struct {
@@ -49,4 +51,21 @@ func (service *orderService) GetOrderByID(id int) (dto.OrderResponse, *helpers.A
 		CreatedAt:    order.CreatedAt,
 		UpdatedAt:    order.UpdatedAt,
 	}, nil
+}
+
+func (service *orderService) CreateOrder(request dto.OrderRequest) dto.OrderResponse {
+	order := domain.Order{}
+
+	order.UserID = request.UserID
+	order.CustomerName = request.CustomerName
+	order.Amount = request.Amount
+
+	order = service.orderRepository.CreateOrder(order)
+
+	return dto.OrderResponse{
+		OrderID:      order.OrderID,
+		UserID:       order.UserID,
+		CustomerName: order.CustomerName,
+		Amount:       order.Amount,
+	}
 }
