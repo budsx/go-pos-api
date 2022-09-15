@@ -5,6 +5,7 @@ import (
 	"go-pos-api/dto"
 	"go-pos-api/helpers"
 	"go-pos-api/repositories"
+	"time"
 )
 
 type OrderService interface {
@@ -54,11 +55,13 @@ func (service *orderService) GetOrderByID(id int) (dto.OrderResponse, *helpers.A
 }
 
 func (service *orderService) CreateOrder(request dto.OrderRequest) dto.OrderResponse {
-	order := domain.Order{}
+	var order domain.Order
 
 	order.UserID = request.UserID
 	order.CustomerName = request.CustomerName
 	order.Amount = request.Amount
+	order.CreatedAt = time.Now()
+	order.UpdatedAt = time.Now()
 
 	order = service.orderRepository.CreateOrder(order)
 
@@ -67,5 +70,7 @@ func (service *orderService) CreateOrder(request dto.OrderRequest) dto.OrderResp
 		UserID:       order.UserID,
 		CustomerName: order.CustomerName,
 		Amount:       order.Amount,
+		CreatedAt:    order.CreatedAt,
+		UpdatedAt:    order.UpdatedAt,
 	}
 }

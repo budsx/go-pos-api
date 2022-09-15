@@ -43,8 +43,7 @@ func (controller *orderController) GetOrderByID(c *gin.Context) {
 }
 
 func (controller *orderController) CreateOrder(c *gin.Context) {
-	var order dto.OrderRequest
-	c.ShouldBindJSON(&order)
-	controller.orderService.CreateOrder(order)
+	order := dto.OrderRequest{}
+	c.BindJSON(&order)
 	c.JSON(200, order)
 }
