@@ -9,7 +9,7 @@ import (
 
 type UserRepositoryDB interface {
 	RegisterUser(domain.User) (domain.User, *helpers.AppError)
-	LoginUser(string) (domain.User, *helpers.AppError)
+	FindByEmail(string) (domain.User, *helpers.AppError)
 }
 
 type userRepositoryDB struct {
@@ -29,7 +29,7 @@ func (repository *userRepositoryDB) RegisterUser(user domain.User) (domain.User,
 	return user, nil
 }
 
-func (repository *userRepositoryDB) LoginUser(email string) (domain.User, *helpers.AppError) {
+func (repository *userRepositoryDB) FindByEmail(email string) (domain.User, *helpers.AppError) {
 	var user domain.User
 	var err error
 	if err = repository.db.Where("email = ?", email).Find(&user).Error; err != nil {

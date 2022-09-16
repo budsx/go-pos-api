@@ -30,12 +30,17 @@ func (services *userServices) RegisterUser(request dto.RegisterRequest) (domain.
 	user.Merchant = request.Merchant
 	passwordHash, err := bcrypt.GenerateFromPassword([]byte(request.Password), bcrypt.MinCost)
 	if err != nil {
-		return user, helpers.NewUnexpectedError("unexpected error")
+		return user, helpers.NewUnexpectedError("Bcrypt Error")
 	}
 	user.Password = string(passwordHash)
+
+	avail, _ := services.userRepository.FindByEmail(user.Email)
+	if avail.Email == user.Email {
+		return avail, helpers.NewBadRequestError("User already exist")
+	}
 	newUser, errRegis := services.userRepository.RegisterUser(user)
 	if errRegis != nil {
-		return newUser, helpers.NewUnexpectedError("unexpected error")
+		return newUser, helpers.NewUnexpectedError("Failed register")
 	}
 	return newUser, nil
 }
@@ -43,16 +48,16 @@ func (services *userServices) RegisterUser(request dto.RegisterRequest) (domain.
 func (services *userServices) LoginUser(request dto.LoginRequest) (domain.User, *helpers.AppError) {
 	email := request.Email
 	password := request.Password
-	newUser, errLogin := services.userRepository.LoginUser(email)
+	user, errLogin := services.userRepository.FindByEmail(email)
 	if errLogin != nil {
-		return newUser, helpers.NewUnexpectedError("Error Login")
+		return user, helpers.NewUnexpectedError("Error Login")
 	}
 	if email == "" || password == "" {
 		helpers.NewNotFoundError("Field email or password is empty")
 	}
-	err := helpers.VerifyPassword(password, newUser.Password)
+	err := helpers.VerifyPassword(password, user.Password)
 	if err != nil {
-		return newUser, helpers.NewBadRequestError("Wrong Password or Email")
+		return user, helpers.NewBadRequestError("Wrong Password or Email")
 	}
-	return newUser, nil
+	return user, nil
 }
