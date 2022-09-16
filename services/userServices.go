@@ -11,29 +11,30 @@ import (
 
 type UserServices interface {
 	RegisterUser(request dto.RegisterRequest) (dto.RegisterResponse, *helpers.AppError)
+	LoginUser(request dto.LoginRequest) (domain.User, *helpers.AppError)
 }
 
 type userServices struct {
-	userServices repositories.UserRepositoryDB
+	userRepository repositories.UserRepositoryDB
 }
 
 func NewUserService(userRepository repositories.UserRepositoryDB) *userServices {
 	return &userServices{userRepository}
 }
 
-func (services *userServices) RegisterUser(input dto.RegisterRequest) (dto.RegisterResponse, *helpers.AppError) {
+func (services *userServices) RegisterUser(request dto.RegisterRequest) (dto.RegisterResponse, *helpers.AppError) {
 	user := domain.User{}
-	user.Name = input.Name
-	user.Email = input.Email
-	user.Role = input.Role
-	user.Merchant = input.Merchant
-	passwordHash, err := bcrypt.GenerateFromPassword([]byte(input.Password), bcrypt.MinCost)
+	user.Name = request.Name
+	user.Email = request.Email
+	user.Role = request.Role
+	user.Merchant = request.Merchant
+	passwordHash, err := bcrypt.GenerateFromPassword([]byte(request.Password), bcrypt.MinCost)
 	registResponse := dto.RegisterResponse{}
 	if err != nil {
 		return registResponse, helpers.NewUnexpectedError("unexpected error")
 	}
 	user.Password = string(passwordHash)
-	newUser, errRegis := services.userServices.RegisterUser(user)
+	newUser, errRegis := services.userRepository.RegisterUser(user)
 	if errRegis != nil {
 		return registResponse, helpers.NewUnexpectedError("unexpected error")
 	}
@@ -43,4 +44,21 @@ func (services *userServices) RegisterUser(input dto.RegisterRequest) (dto.Regis
 	registResponse.Role = newUser.Role
 	registResponse.Merchant = newUser.Merchant
 	return registResponse, nil
+}
+
+func (services *userServices) LoginUser(request dto.LoginRequest) (domain.User, *helpers.AppError) {
+	email := request.Email
+	password := request.Password
+	newUser, errLogin := services.userRepository.LoginUser(email)
+	if errLogin != nil {
+		return newUser, helpers.NewUnexpectedError("Error Login")
+	}
+	if email == "" || password == "" {
+		helpers.NewNotFoundError("Field email or password is empty")
+	}
+	err := helpers.VerifyPassword(password, newUser.Password)
+	if err != nil {
+		return newUser, helpers.NewBadRequestError("Wrong Password or Email")
+	}
+	return newUser, nil
 }
