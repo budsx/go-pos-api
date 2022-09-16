@@ -5,7 +5,6 @@ import (
 	"go-pos-api/dto"
 	"go-pos-api/helpers"
 	"go-pos-api/repositories"
-	"time"
 )
 
 type OrderService interface {
@@ -60,8 +59,6 @@ func (service *orderService) CreateOrder(request dto.OrderRequest) dto.OrderResp
 	order.UserID = request.UserID
 	order.CustomerName = request.CustomerName
 	order.Amount = request.Amount
-	order.CreatedAt = time.Now()
-	order.UpdatedAt = time.Now()
 
 	order = service.orderRepository.CreateOrder(order)
 

@@ -45,5 +45,7 @@ func (controller *orderController) GetOrderByID(c *gin.Context) {
 func (controller *orderController) CreateOrder(c *gin.Context) {
 	order := dto.OrderRequest{}
 	c.BindJSON(&order)
-	c.JSON(200, order)
+	controller.orderService.CreateOrder(order)
+	response := helpers.APIResponse("Order Created", http.StatusCreated, "Success", order)
+	c.JSON(http.StatusCreated, response)
 }
