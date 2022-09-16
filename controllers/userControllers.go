@@ -38,8 +38,19 @@ func (controllers *userController) RegisterUser(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, res)
 		return
 	}
-	response := helpers.APIResponse(http.StatusCreated, "Success", "Register User success!", newUser)
-
+	token, errToken := controllers.authServices.GenerateToken(newUser.ID)
+	if errToken != nil {
+		res := helpers.APIResponse(http.StatusBadRequest, "Error", "Register user failed", "Failed generate token")
+		c.JSON(http.StatusBadRequest, res)
+		return
+	}
+	if err != nil {
+		res := helpers.APIResponse(http.StatusBadRequest, "Error", "Register user failed", "Failed create user")
+		c.JSON(http.StatusBadRequest, res)
+		return
+	}
+	userRegist := dto.RegisterInput(newUser, token)
+	response := helpers.APIResponse(http.StatusCreated, "Success", "Register User success!", userRegist)
 	c.JSON(http.StatusCreated, response)
 }
 
@@ -52,11 +63,15 @@ func (controllers *userController) LoginUser(c *gin.Context) {
 		c.JSON(http.StatusUnprocessableEntity, response)
 		return
 	}
-	loginUser, _ := controllers.userServices.LoginUser(request)
-
+	loginUser, errLogin := controllers.userServices.LoginUser(request)
+	if errLogin != nil {
+		res := helpers.APIResponse(http.StatusBadRequest, "error", "Login user failed", "Failed")
+		c.JSON(http.StatusBadRequest, res)
+		return
+	}
 	token, errToken := controllers.authServices.GenerateToken(loginUser.ID)
 	if errToken != nil {
-		res := helpers.APIResponse(http.StatusBadRequest, "error", "Login user failed", nil)
+		res := helpers.APIResponse(http.StatusBadRequest, "error", "Login user failed", "Failed")
 		c.JSON(http.StatusBadRequest, res)
 		return
 	}

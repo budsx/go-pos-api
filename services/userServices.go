@@ -10,7 +10,7 @@ import (
 )
 
 type UserServices interface {
-	RegisterUser(request dto.RegisterRequest) (dto.RegisterResponse, *helpers.AppError)
+	RegisterUser(request dto.RegisterRequest) (domain.User, *helpers.AppError)
 	LoginUser(request dto.LoginRequest) (domain.User, *helpers.AppError)
 }
 
@@ -22,28 +22,22 @@ func NewUserService(userRepository repositories.UserRepositoryDB) *userServices 
 	return &userServices{userRepository}
 }
 
-func (services *userServices) RegisterUser(request dto.RegisterRequest) (dto.RegisterResponse, *helpers.AppError) {
+func (services *userServices) RegisterUser(request dto.RegisterRequest) (domain.User, *helpers.AppError) {
 	user := domain.User{}
 	user.Name = request.Name
 	user.Email = request.Email
 	user.Role = request.Role
 	user.Merchant = request.Merchant
 	passwordHash, err := bcrypt.GenerateFromPassword([]byte(request.Password), bcrypt.MinCost)
-	registResponse := dto.RegisterResponse{}
 	if err != nil {
-		return registResponse, helpers.NewUnexpectedError("unexpected error")
+		return user, helpers.NewUnexpectedError("unexpected error")
 	}
 	user.Password = string(passwordHash)
 	newUser, errRegis := services.userRepository.RegisterUser(user)
 	if errRegis != nil {
-		return registResponse, helpers.NewUnexpectedError("unexpected error")
+		return newUser, helpers.NewUnexpectedError("unexpected error")
 	}
-	registResponse.ID = newUser.ID
-	registResponse.Name = newUser.Name
-	registResponse.Email = newUser.Email
-	registResponse.Role = newUser.Role
-	registResponse.Merchant = newUser.Merchant
-	return registResponse, nil
+	return newUser, nil
 }
 
 func (services *userServices) LoginUser(request dto.LoginRequest) (domain.User, *helpers.AppError) {
