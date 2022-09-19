@@ -1,6 +1,7 @@
 package services
 
 import (
+	"fmt"
 	"go-pos-api/domain"
 	"go-pos-api/dto"
 	"go-pos-api/helpers"
@@ -13,6 +14,7 @@ type ProductService interface {
 	CreateProduct(dto.ProductRequest) (dto.ProductResponse, *helpers.AppError)
 	DeleteProductById(int) (domain.Product, *helpers.AppError)
 	UpdateProductById(dto.ProductRequest, int) (dto.ProductResponse, *helpers.AppError)
+	UploadImageProduct(int, string) (domain.Product, *helpers.AppError)
 }
 
 type productService struct {
@@ -106,4 +108,18 @@ func (service *productService) UpdateProductById(input dto.ProductRequest, id in
 		return productResponse, err
 	}
 	return productResponse, nil
+}
+
+func (service *productService) UploadImageProduct(productId int, fileLocation string) (domain.Product, *helpers.AppError) {
+	product, err := service.productService.GetProductById(productId)
+	if err != nil {
+		return product, err
+	}
+	fmt.Println("FIle location", fileLocation)
+	product.ProductImage = fileLocation
+	updatedProduct, err := service.productService.UpdateProductById(product, productId)
+	if err != nil {
+		return updatedProduct, err
+	}
+	return updatedProduct, nil
 }
