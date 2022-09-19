@@ -16,6 +16,7 @@ type UserController interface {
 	GetAllUsers(c *gin.Context)
 	GetUsersByID(c *gin.Context)
 	UpdateUser(c *gin.Context)
+	DeleteUser(c *gin.Context)
 }
 
 type userController struct {
@@ -126,5 +127,18 @@ func (controllers *userController) UpdateUser(c *gin.Context) {
 		return
 	}
 	response := helpers.APIResponse(http.StatusOK, "Success", "Update User success", updatedUsers)
+	c.JSON(http.StatusOK, response)
+}
+
+func (controllers *userController) DeleteUser(c *gin.Context) {
+	usersIdString := c.Param("user_id")
+	usersID, _ := strconv.Atoi(usersIdString)
+	_, err := controllers.userServices.DeleteUser(usersID)
+	if err != nil {
+		response := helpers.APIResponse(http.StatusInternalServerError, "Error", "Delete User failed", "Failed Delete User")
+		c.JSON(http.StatusInternalServerError, response)
+		return
+	}
+	response := helpers.APIResponse(http.StatusOK, "Success", "Delete User success", "Success Delete User Where ID = "+usersIdString)
 	c.JSON(http.StatusOK, response)
 }

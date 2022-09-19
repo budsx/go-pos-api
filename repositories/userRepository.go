@@ -13,6 +13,7 @@ type UserRepositoryDB interface {
 	GetAllUsers() ([]domain.User, *helpers.AppError)
 	GetUsersByID(int) (domain.User, *helpers.AppError)
 	UpdateUser(domain.User, int) (domain.User, *helpers.AppError)
+	DeleteUser(int) (domain.User, *helpers.AppError)
 }
 
 type userRepositoryDB struct {
@@ -68,4 +69,14 @@ func (repository *userRepositoryDB) UpdateUser(updateUser domain.User, user_id i
 		return updateUser, helpers.NewUnexpectedError("User Not Found")
 	}
 	return updateUser, nil
+}
+
+func (repository *userRepositoryDB) DeleteUser(user_id int) (domain.User, *helpers.AppError) {
+	var users domain.User
+	var err error
+	if err = repository.db.Where("user_id = ?", user_id).Delete(&users).Error; err != nil {
+		helpers.Error("Unexpected Error:" + err.Error())
+		return users, helpers.NewUnexpectedError("User Not Found")
+	}
+	return users, nil
 }

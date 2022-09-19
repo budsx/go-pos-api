@@ -15,6 +15,7 @@ type UserServices interface {
 	GetAllUsers() ([]dto.LoginResponse, *helpers.AppError)
 	GetUsersByID(int) (dto.LoginResponse, *helpers.AppError)
 	UpdateUser(dto.RegisterRequest, int) (dto.RegisterResponse, *helpers.AppError)
+	DeleteUser(int) (domain.User, *helpers.AppError)
 }
 
 type userServices struct {
@@ -118,4 +119,12 @@ func (services *userServices) UpdateUser(request dto.RegisterRequest, user_id in
 	}
 	return updateResponse, nil
 
+}
+
+func (services *userServices) DeleteUser(user_id int) (domain.User, *helpers.AppError) {
+	delUser, err := services.userRepository.DeleteUser(user_id)
+	if err != nil {
+		return delUser, err
+	}
+	return delUser, nil
 }
