@@ -12,6 +12,7 @@ type UserRepositoryDB interface {
 	FindByEmail(string) (domain.User, *helpers.AppError)
 	GetAllUsers() ([]domain.User, *helpers.AppError)
 	GetUsersByID(int) (domain.User, *helpers.AppError)
+	UpdateUser(domain.User, int) (domain.User, *helpers.AppError)
 }
 
 type userRepositoryDB struct {
@@ -59,4 +60,12 @@ func (repository *userRepositoryDB) GetUsersByID(user_id int) (domain.User, *hel
 		return users, helpers.NewUnexpectedError("User Not Found")
 	}
 	return users, nil
+}
+
+func (repository *userRepositoryDB) UpdateUser(updateUser domain.User, user_id int) (domain.User, *helpers.AppError) {
+	var err error
+	if err = repository.db.Model(&updateUser).Where("user_id = ?", user_id).Updates(updateUser).Error; err != nil {
+		return updateUser, helpers.NewUnexpectedError("User Not Found")
+	}
+	return updateUser, nil
 }

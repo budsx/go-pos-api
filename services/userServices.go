@@ -14,6 +14,7 @@ type UserServices interface {
 	LoginUser(request dto.LoginRequest) (domain.User, *helpers.AppError)
 	GetAllUsers() ([]dto.LoginResponse, *helpers.AppError)
 	GetUsersByID(int) (dto.LoginResponse, *helpers.AppError)
+	UpdateUser(dto.RegisterRequest, int) (dto.RegisterResponse, *helpers.AppError)
 }
 
 type userServices struct {
@@ -95,4 +96,26 @@ func (services *userServices) GetUsersByID(user_id int) (dto.LoginResponse, *hel
 		userResponse.Merchant = getUser.Merchant
 		return userResponse, nil
 	}
+}
+
+func (services *userServices) UpdateUser(request dto.RegisterRequest, user_id int) (dto.RegisterResponse, *helpers.AppError) {
+	users := domain.User{}
+	users.ID = user_id
+	users.Name = request.Name
+	users.Email = request.Email
+	users.Role = request.Role
+	users.Merchant = request.Merchant
+
+	updateResponse := dto.RegisterResponse{}
+	updateUser, err := services.userRepository.UpdateUser(users, user_id)
+	updateResponse.ID = user_id
+	updateResponse.Name = updateUser.Name
+	updateResponse.Email = updateUser.Email
+	updateResponse.Role = updateUser.Role
+	updateResponse.Merchant = updateUser.Merchant
+	if err != nil {
+		return updateResponse, err
+	}
+	return updateResponse, nil
+
 }

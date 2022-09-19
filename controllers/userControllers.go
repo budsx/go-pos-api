@@ -15,6 +15,7 @@ type UserController interface {
 	LoginUser(c *gin.Context)
 	GetAllUsers(c *gin.Context)
 	GetUsersByID(c *gin.Context)
+	UpdateUser(c *gin.Context)
 }
 
 type userController struct {
@@ -104,5 +105,26 @@ func (controllers *userController) GetUsersByID(c *gin.Context) {
 		return
 	}
 	response := helpers.APIResponse(http.StatusOK, "Success", "GetUsersByID success", users)
+	c.JSON(http.StatusOK, response)
+}
+
+func (controllers *userController) UpdateUser(c *gin.Context) {
+	usersIdString := c.Param("user_id")
+	usersID, _ := strconv.Atoi(usersIdString)
+	var request dto.RegisterRequest
+	errShouldBindJSON := c.ShouldBindJSON(&request)
+
+	if errShouldBindJSON != nil {
+		response := helpers.APIResponse(http.StatusInternalServerError, "Error", "Update User failed", "Failed Update User")
+		c.JSON(http.StatusInternalServerError, response)
+		return
+	}
+	updatedUsers, err := controllers.userServices.UpdateUser(request, usersID)
+	if err != nil {
+		response := helpers.APIResponse(http.StatusInternalServerError, "Error", "Update User failed", "Failed Update User")
+		c.JSON(http.StatusInternalServerError, response)
+		return
+	}
+	response := helpers.APIResponse(http.StatusOK, "Success", "Update User success", updatedUsers)
 	c.JSON(http.StatusOK, response)
 }
