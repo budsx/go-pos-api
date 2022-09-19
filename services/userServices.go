@@ -13,6 +13,7 @@ type UserServices interface {
 	RegisterUser(request dto.RegisterRequest) (domain.User, *helpers.AppError)
 	LoginUser(request dto.LoginRequest) (domain.User, *helpers.AppError)
 	GetAllUsers() ([]dto.LoginResponse, *helpers.AppError)
+	GetUsersByID(int) (dto.LoginResponse, *helpers.AppError)
 }
 
 type userServices struct {
@@ -79,4 +80,19 @@ func (services *userServices) GetAllUsers() ([]dto.LoginResponse, *helpers.AppEr
 		})
 	}
 	return userResponse, nil
+}
+
+func (services *userServices) GetUsersByID(user_id int) (dto.LoginResponse, *helpers.AppError) {
+	getUser, err := services.userRepository.GetUsersByID(user_id)
+	userResponse := dto.LoginResponse{}
+	if err != nil {
+		return userResponse, err
+	} else {
+		userResponse.ID = getUser.ID
+		userResponse.Name = getUser.Name
+		userResponse.Email = getUser.Email
+		userResponse.Role = getUser.Role
+		userResponse.Merchant = getUser.Merchant
+		return userResponse, nil
+	}
 }

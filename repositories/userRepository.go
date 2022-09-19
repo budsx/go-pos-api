@@ -11,6 +11,7 @@ type UserRepositoryDB interface {
 	RegisterUser(domain.User) (domain.User, *helpers.AppError)
 	FindByEmail(string) (domain.User, *helpers.AppError)
 	GetAllUsers() ([]domain.User, *helpers.AppError)
+	GetUsersByID(int) (domain.User, *helpers.AppError)
 }
 
 type userRepositoryDB struct {
@@ -44,6 +45,16 @@ func (repository *userRepositoryDB) GetAllUsers() ([]domain.User, *helpers.AppEr
 	var users []domain.User
 	var err error
 	if err = repository.db.Find(&users).Error; err != nil {
+		helpers.Error("Unexpected Error:" + err.Error())
+		return users, helpers.NewUnexpectedError("User Not Found")
+	}
+	return users, nil
+}
+
+func (repository *userRepositoryDB) GetUsersByID(user_id int) (domain.User, *helpers.AppError) {
+	var users domain.User
+	var err error
+	if err = repository.db.Where("user_id = ?", user_id).Find(&users).Error; err != nil {
 		helpers.Error("Unexpected Error:" + err.Error())
 		return users, helpers.NewUnexpectedError("User Not Found")
 	}

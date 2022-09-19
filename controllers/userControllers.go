@@ -5,6 +5,7 @@ import (
 	"go-pos-api/helpers"
 	"go-pos-api/services"
 	"net/http"
+	"strconv"
 
 	"github.com/gin-gonic/gin"
 )
@@ -13,6 +14,7 @@ type UserController interface {
 	RegisterUser(c *gin.Context)
 	LoginUser(c *gin.Context)
 	GetAllUsers(c *gin.Context)
+	GetUsersByID(c *gin.Context)
 }
 
 type userController struct {
@@ -89,5 +91,18 @@ func (controllers *userController) GetAllUsers(c *gin.Context) {
 		return
 	}
 	response := helpers.APIResponse(http.StatusOK, "Success", "GetAllUsers success", users)
+	c.JSON(http.StatusOK, response)
+}
+
+func (controllers *userController) GetUsersByID(c *gin.Context) {
+	usersIdString := c.Param("user_id")
+	usersID, _ := strconv.Atoi(usersIdString)
+	users, err := controllers.userServices.GetUsersByID(usersID)
+	if err != nil {
+		response := helpers.APIResponse(http.StatusInternalServerError, "Error", "GetUsersByID failed", "Failed GetUsersByID")
+		c.JSON(http.StatusInternalServerError, response)
+		return
+	}
+	response := helpers.APIResponse(http.StatusOK, "Success", "GetUsersByID success", users)
 	c.JSON(http.StatusOK, response)
 }
