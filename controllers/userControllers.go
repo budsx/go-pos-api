@@ -112,14 +112,14 @@ func (controllers *userController) GetUsersByID(c *gin.Context) {
 func (controllers *userController) UpdateUser(c *gin.Context) {
 	usersIdString := c.Param("user_id")
 	usersID, _ := strconv.Atoi(usersIdString)
-	var request dto.RegisterRequest
+	request := dto.RegisterRequest{}
 	errShouldBindJSON := c.ShouldBindJSON(&request)
-
 	if errShouldBindJSON != nil {
-		response := helpers.APIResponse(http.StatusInternalServerError, "Error", "Update User failed", "Failed Update User")
+		response := helpers.APIResponse(http.StatusInternalServerError, "Error", "Update User failed", "Failed Update User = "+usersIdString)
 		c.JSON(http.StatusInternalServerError, response)
 		return
 	}
+
 	updatedUsers, err := controllers.userServices.UpdateUser(request, usersID)
 	if err != nil {
 		response := helpers.APIResponse(http.StatusInternalServerError, "Error", "Update User failed", "Failed Update User")
