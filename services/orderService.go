@@ -10,7 +10,7 @@ import (
 type OrderService interface {
 	GetAllOrder() []dto.OrderResponse
 	GetOrderByID(id int) (dto.OrderResponse, *helpers.AppError)
-	CreateOrder(request dto.OrderRequest) dto.OrderResponse
+	CreateOrder(request dto.OrderRequest) (dto.OrderResponse, *helpers.AppError)
 }
 
 type orderService struct {
@@ -53,14 +53,17 @@ func (service *orderService) GetOrderByID(id int) (dto.OrderResponse, *helpers.A
 	}, nil
 }
 
-func (service *orderService) CreateOrder(request dto.OrderRequest) dto.OrderResponse {
+func (service *orderService) CreateOrder(request dto.OrderRequest) (dto.OrderResponse, *helpers.AppError) {
 	var order domain.Order
 
 	order.UserID = request.UserID
 	order.CustomerName = request.CustomerName
 	order.Amount = request.Amount
 
-	order = service.orderRepository.CreateOrder(order)
+	order, err := service.orderRepository.CreateOrder(order)
+	if err != nil {
+		helpers.NewBadRequestError("Bad Request")
+	}
 
 	return dto.OrderResponse{
 		OrderID:      order.OrderID,
@@ -69,5 +72,5 @@ func (service *orderService) CreateOrder(request dto.OrderRequest) dto.OrderResp
 		Amount:       order.Amount,
 		CreatedAt:    order.CreatedAt,
 		UpdatedAt:    order.UpdatedAt,
-	}
+	}, nil
 }

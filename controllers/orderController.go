@@ -34,18 +34,33 @@ func (controller *orderController) GetOrderByID(c *gin.Context) {
 	id, _ := strconv.Atoi(c.Param("order_id"))
 	order, err := controller.orderService.GetOrderByID(id)
 	if err != nil {
-		response := helpers.APIResponse("Get Order Detail", http.StatusBadRequest, "Order Not Found", nil)
+		response := helpers.APIResponse("Order Not Found", http.StatusBadRequest, "Order Not Found", nil)
 		c.JSON(http.StatusBadRequest, response)
+		return
 	} else {
 		response := helpers.APIResponse("Get Order Detail", http.StatusOK, "Success", order)
 		c.JSON(http.StatusOK, response)
+		return
 	}
 }
 
 func (controller *orderController) CreateOrder(c *gin.Context) {
-	order := dto.OrderRequest{}
-	c.BindJSON(&order)
-	controller.orderService.CreateOrder(order)
-	response := helpers.APIResponse("Order Created", http.StatusCreated, "Success", order)
-	c.JSON(http.StatusCreated, response)
+	request := dto.OrderRequest{}
+	err := c.ShouldBindJSON(&request)
+	if err != nil {
+		response := helpers.APIResponse("Failed to create new order", http.StatusBadRequest, "Error", nil)
+		c.JSON(http.StatusBadRequest, response)
+		return
+	}
+	order, errs := controller.orderService.CreateOrder(request)
+	if errs != nil {
+		response := helpers.APIResponse("Failed to create new order", http.StatusBadRequest, "Error", nil)
+		c.JSON(http.StatusBadRequest, response)
+		return
+	} else {
+		response := helpers.APIResponse("Order Created", http.StatusCreated, "Success", order)
+		c.JSON(http.StatusCreated, response)
+		return
+	}
+
 }
