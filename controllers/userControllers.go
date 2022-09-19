@@ -12,6 +12,7 @@ import (
 type UserController interface {
 	RegisterUser(c *gin.Context)
 	LoginUser(c *gin.Context)
+	GetAllUsers(c *gin.Context)
 }
 
 type userController struct {
@@ -77,5 +78,16 @@ func (controllers *userController) LoginUser(c *gin.Context) {
 	}
 	userRequest := dto.UserInput(loginUser, token)
 	response := helpers.APIResponse(http.StatusOK, "Success", "Login user success!", userRequest)
+	c.JSON(http.StatusOK, response)
+}
+
+func (controllers *userController) GetAllUsers(c *gin.Context) {
+	users, err := controllers.userServices.GetAllUsers()
+	if err != nil {
+		response := helpers.APIResponse(http.StatusInternalServerError, "Error", "GetAllUsers failed", "Failed GetAllUsers")
+		c.JSON(http.StatusInternalServerError, response)
+		return
+	}
+	response := helpers.APIResponse(http.StatusOK, "Success", "GetAllUsers success", users)
 	c.JSON(http.StatusOK, response)
 }

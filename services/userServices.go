@@ -12,6 +12,7 @@ import (
 type UserServices interface {
 	RegisterUser(request dto.RegisterRequest) (domain.User, *helpers.AppError)
 	LoginUser(request dto.LoginRequest) (domain.User, *helpers.AppError)
+	GetAllUsers() ([]dto.LoginResponse, *helpers.AppError)
 }
 
 type userServices struct {
@@ -60,4 +61,22 @@ func (services *userServices) LoginUser(request dto.LoginRequest) (domain.User, 
 		return user, helpers.NewBadRequestError("Wrong Password or Email")
 	}
 	return user, nil
+}
+
+func (services *userServices) GetAllUsers() ([]dto.LoginResponse, *helpers.AppError) {
+	getUser, err := services.userRepository.GetAllUsers()
+	userResponse := []dto.LoginResponse{}
+	if err != nil {
+		return userResponse, err
+	}
+	for _, user := range getUser {
+		userResponse = append(userResponse, dto.LoginResponse{
+			ID:       user.ID,
+			Name:     user.Name,
+			Email:    user.Email,
+			Role:     user.Role,
+			Merchant: user.Merchant,
+		})
+	}
+	return userResponse, nil
 }
