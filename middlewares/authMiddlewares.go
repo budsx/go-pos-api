@@ -17,7 +17,6 @@ func AuthMiddleware(userServices services.UserServices, authService services.Aut
 			c.AbortWithStatusJSON(http.StatusUnauthorized, response)
 			return
 		}
-		// Bearer token
 		tokenString := ""
 		arrayToken := strings.Split(authHeader, " ")
 		if len(arrayToken) == 2 {
