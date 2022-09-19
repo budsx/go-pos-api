@@ -1,6 +1,7 @@
 package controllers
 
 import (
+	"fmt"
 	"go-pos-api/dto"
 	"go-pos-api/helpers"
 	"go-pos-api/services"
@@ -16,6 +17,7 @@ type ProductController interface {
 	CreateProduct(c *gin.Context)
 	DeleteProductById(c *gin.Context)
 	UpdateProductById(c *gin.Context)
+	UploadImageProduct(c *gin.Context)
 }
 
 type productController struct {
@@ -98,5 +100,26 @@ func (controller *productController) UpdateProductById(c *gin.Context) {
 		return
 	}
 	response := helpers.APIResponse("Success Updated product", http.StatusOK, "success", updatedProduct)
+	c.JSON(http.StatusOK, response)
+}
+
+func (controller *productController) UploadImageProduct(c *gin.Context) {
+	file, err := c.FormFile("image")
+	productIdString := c.Param("product_id")
+	productId, _ := strconv.Atoi(productIdString)
+	if err != nil {
+		response := helpers.APIResponse("Error upload file", http.StatusBadRequest, "error", nil)
+		c.JSON(http.StatusBadRequest, response)
+		return
+	}
+	path := fmt.Sprintf("images/%s", file.Filename)
+	err = c.SaveUploadedFile(file, path)
+	if err != nil {
+		response := helpers.APIResponse("Error upload file", http.StatusBadRequest, "error", nil)
+		c.JSON(http.StatusBadRequest, response)
+		return
+	}
+	product, _ := controller.productService.UploadImageProduct(productId, path)
+	response := helpers.APIResponse("Success Upload image", http.StatusOK, "success", product)
 	c.JSON(http.StatusOK, response)
 }
