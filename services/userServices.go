@@ -14,7 +14,7 @@ type UserServices interface {
 	LoginUser(request dto.LoginRequest) (domain.User, *helpers.AppError)
 	GetAllUsers() ([]dto.LoginResponse, *helpers.AppError)
 	GetUsersByID(int) (dto.LoginResponse, *helpers.AppError)
-	UpdateUser(dto.RegisterRequest, int) (dto.RegisterResponse, *helpers.AppError)
+	UpdateUser(dto.RegisterRequest, int) (domain.User, *helpers.AppError)
 	DeleteUser(int) (domain.User, *helpers.AppError)
 }
 
@@ -99,7 +99,7 @@ func (services *userServices) GetUsersByID(user_id int) (dto.LoginResponse, *hel
 	}
 }
 
-func (services *userServices) UpdateUser(request dto.RegisterRequest, user_id int) (dto.RegisterResponse, *helpers.AppError) {
+func (services *userServices) UpdateUser(request dto.RegisterRequest, user_id int) (domain.User, *helpers.AppError) {
 	users := domain.User{}
 	users.ID = user_id
 	users.Name = request.Name
@@ -107,7 +107,13 @@ func (services *userServices) UpdateUser(request dto.RegisterRequest, user_id in
 	users.Role = request.Role
 	users.Merchant = request.Merchant
 
-	updateResponse := dto.RegisterResponse{}
+	updateResponse := domain.User{}
+	passwordHash, errHash := bcrypt.GenerateFromPassword([]byte(request.Password), bcrypt.MinCost)
+	if errHash != nil {
+		return users, helpers.NewUnexpectedError("Bcrypt Error")
+	}
+	users.Password = string(passwordHash)
+
 	updateUser, err := services.userRepository.UpdateUser(users, user_id)
 	updateResponse.ID = user_id
 	updateResponse.Name = updateUser.Name
