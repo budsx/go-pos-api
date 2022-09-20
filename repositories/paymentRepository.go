@@ -1,6 +1,7 @@
 package repositories
 
 import (
+	"fmt"
 	"go-pos-api/domain"
 	"go-pos-api/helpers"
 
@@ -10,6 +11,7 @@ import (
 type PaymentRepository interface {
 	CreatePayment(domain.Payment) (domain.Payment, error)
 	UpdatePayment(domain.Payment) (domain.Payment, error)
+	GetPaymentByOrderIdAndAmount(int) (domain.Payment, error)
 }
 
 type paymentRepository struct {
@@ -35,5 +37,15 @@ func (repository *paymentRepository) UpdatePayment(payment domain.Payment) (doma
 		helpers.Error(err.Error())
 		return payment, err
 	}
+	return payment, nil
+}
+
+func (repository *paymentRepository) GetPaymentByOrderIdAndAmount(id int) (domain.Payment, error) {
+	var err error
+	payment := domain.Payment{}
+	if err = repository.db.Where("payment_id = ?", id).Find(&payment).Error; err != nil {
+		return payment, err
+	}
+	fmt.Println("Payment", payment)
 	return payment, nil
 }

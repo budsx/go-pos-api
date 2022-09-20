@@ -1,6 +1,8 @@
 package controllers
 
 import (
+	"fmt"
+	"go-pos-api/domain"
 	"go-pos-api/dto"
 	"go-pos-api/helpers"
 	"go-pos-api/services"
@@ -11,14 +13,16 @@ import (
 
 type PaymentController interface {
 	CreatePayment(c *gin.Context)
+	GetNotificationFromMidtrans(c *gin.Context)
 }
 
 type paymentController struct {
-	paymentService services.PaymentService
+	paymentService  services.PaymentService
+	midtransService services.MidtransService
 }
 
-func NewPaymentController(paymentService services.PaymentService) *paymentController {
-	return &paymentController{paymentService: paymentService}
+func NewPaymentController(paymentService services.PaymentService, midtransService services.MidtransService) *paymentController {
+	return &paymentController{paymentService, midtransService}
 }
 
 func (controller *paymentController) CreatePayment(c *gin.Context) {
@@ -37,4 +41,28 @@ func (controller *paymentController) CreatePayment(c *gin.Context) {
 	}
 	response := helpers.APIResponse("Success Create Payment", http.StatusCreated, "success", newPayment)
 	c.JSON(http.StatusCreated, response)
+}
+
+func (controller *paymentController) GetNotificationFromMidtrans(c *gin.Context) {
+	var input domain.TransactionNotificationFromMidtrans
+	err := c.ShouldBindJSON(&input)
+	fmt.Println("input2", input)
+
+	if err != nil {
+		fmt.Println("ERR 1", err)
+		response := helpers.APIResponse("Something went wrong", http.StatusInternalServerError, "error", nil)
+		c.JSON(http.StatusInternalServerError, response)
+		return
+	}
+
+	err = controller.midtransService.ProcessPayment(input)
+	if err != nil {
+		fmt.Println("ERR 2", err)
+		response := helpers.APIResponse("Something went wrong", http.StatusInternalServerError, "error", nil)
+		c.JSON(http.StatusInternalServerError, response)
+		return
+	}
+	fmt.Println("input", input)
+	response := helpers.APIResponse("Success get notification from midtrans", http.StatusOK, "success", input)
+	c.JSON(http.StatusOK, response)
 }

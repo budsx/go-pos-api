@@ -1,21 +1,25 @@
 package services
 
 import (
+	"fmt"
 	"go-pos-api/domain"
+	"go-pos-api/repositories"
 	"strconv"
 
 	"github.com/veritrans/go-midtrans"
 )
 
 type midtransService struct {
+	paymentRepository repositories.PaymentRepository
 }
 
 type MidtransService interface {
 	GetPaymentURL(domain.Payment) (string, error)
+	ProcessPayment(domain.TransactionNotificationFromMidtrans) error
 }
 
-func NewMidTransService() *midtransService {
-	return &midtransService{}
+func NewMidTransService(paymentRepository repositories.PaymentRepository) *midtransService {
+	return &midtransService{paymentRepository: paymentRepository}
 }
 
 func (ms *midtransService) GetPaymentURL(payment domain.Payment) (string, error) {
@@ -42,4 +46,23 @@ func (ms *midtransService) GetPaymentURL(payment domain.Payment) (string, error)
 	}
 
 	return snapToken.RedirectURL, nil
+}
+
+func (ms *midtransService) ProcessPayment(input domain.TransactionNotificationFromMidtrans) error {
+	// get result from midtrans
+	fmt.Println("input13", input)
+	intOrderId, _ := strconv.Atoi(input.OrderID)
+	if input.PaymentType == "bank_transfer" && input.TransactionStatus == "settlement" && input.FraudStatus == "accept" {
+		payment, err := ms.paymentRepository.GetPaymentByOrderIdAndAmount(intOrderId)
+		if err != nil {
+			return err
+		}
+
+		payment.Status = "success"
+		_, errUpdatedPayment := ms.paymentRepository.UpdatePayment(payment)
+		if errUpdatedPayment != nil {
+			return errUpdatedPayment
+		}
+	}
+	return nil
 }

@@ -12,3 +12,11 @@ type Payment struct {
 	CreatedAt       time.Time
 	UpdatedAt       time.Time
 }
+
+type TransactionNotificationFromMidtrans struct {
+	TransactionStatus string `json:"transaction_status"`
+	OrderID           string `json:"order_id"`
+	PaymentType       string `json:"payment_type"`
+	FraudStatus       string `json:"fraud_status"`
+	Amount            string `json:"gross_amount"`
+}
