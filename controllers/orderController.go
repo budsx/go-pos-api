@@ -48,7 +48,7 @@ func (controller *orderController) CreateOrder(c *gin.Context) {
 	request := dto.OrderRequest{}
 	err := c.ShouldBindJSON(&request)
 	if err != nil {
-		response := helpers.APIResponse("Failed to create new order", http.StatusBadRequest, "Error", nil)
+		response := helpers.APIResponse("Failed to create new order", http.StatusBadRequest, "Error", err.Error())
 		c.JSON(http.StatusBadRequest, response)
 		return
 	}

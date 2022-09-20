@@ -14,11 +14,13 @@ type OrderService interface {
 }
 
 type orderService struct {
-	orderRepository repositories.OrderRepository
+	orderRepository       repositories.OrderRepository
+	detailOrderRepository repositories.DetailOrderRepository
+	productRepository     repositories.ProductRepository
 }
 
-func NewOrderService(orderRepository repositories.OrderRepository) OrderService {
-	return &orderService{orderRepository}
+func NewOrderService(orderRepository repositories.OrderRepository, detailOrderRepository repositories.DetailOrderRepository, productRepository repositories.ProductRepository) OrderService {
+	return &orderService{orderRepository, detailOrderRepository, productRepository}
 }
 
 func (service *orderService) GetAllOrder() []dto.OrderResponse {
@@ -58,19 +60,44 @@ func (service *orderService) CreateOrder(request dto.OrderRequest) (dto.OrderRes
 
 	order.UserID = request.UserID
 	order.CustomerName = request.CustomerName
-	order.Amount = request.Amount
+	var grandTotal int
 
 	order, err := service.orderRepository.CreateOrder(order)
 	if err != nil {
 		helpers.NewBadRequestError("Bad Request")
 	}
 
+	detailOrder := []domain.DetailOrder{}
+	var orderProducts []dto.OrderProductRequest
+
+	for i, product := range request.Products {
+		productDetail, _ := service.productRepository.GetProductById(product.ProductID)
+		detailOrder = append(detailOrder, domain.DetailOrder{
+			ProductID: product.ProductID,
+			OrderID:   order.OrderID,
+			Quantity:  product.Quantity,
+			SubTotal:  product.Quantity * productDetail.Price,
+		})
+		grandTotal += product.Quantity * productDetail.Price
+
+		productDetail.Stock -= product.Quantity
+		tempProduct, _ := service.productRepository.UpdateProductById(productDetail, product.ProductID)
+		orderProducts = append(orderProducts, dto.OrderProductRequest{
+			ProductID:   tempProduct.ID,
+			ProductName: tempProduct.Name,
+			Quantity:    product.Quantity,
+		})
+		service.detailOrderRepository.CreateDetailOrder(detailOrder[i])
+
+	}
+
 	return dto.OrderResponse{
 		OrderID:      order.OrderID,
 		UserID:       order.UserID,
 		CustomerName: order.CustomerName,
-		Amount:       order.Amount,
-		CreatedAt:    order.CreatedAt,
-		UpdatedAt:    order.UpdatedAt,
+		Amount:    grandTotal,
+		CreatedAt: order.CreatedAt,
+		UpdatedAt: order.UpdatedAt,
+		Products:  orderProducts,
 	}, nil
 }
