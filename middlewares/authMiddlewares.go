@@ -13,7 +13,7 @@ func AuthMiddleware(userServices services.UserServices, authService services.Aut
 	return func(c *gin.Context) {
 		authHeader := c.GetHeader("Authorization")
 		if !strings.Contains(authHeader, "Bearer") {
-			response := helpers.APIResponse(http.StatusUnauthorized, "Error", "Unauthorized", "Dont Have Authorization")
+			response := helpers.APIResponse("Unauthorized", http.StatusUnauthorized, "Error", "Dont Have Authorization")
 			c.AbortWithStatusJSON(http.StatusUnauthorized, response)
 			return
 		}
@@ -24,13 +24,13 @@ func AuthMiddleware(userServices services.UserServices, authService services.Aut
 		}
 		result, userId, err := authService.ValidateToken(tokenString)
 		if err != nil && !result && userId == 0 {
-			response := helpers.APIResponse(http.StatusUnauthorized, "Error", "Unauthorized", "Dont Have Authorization")
+			response := helpers.APIResponse("Unauthorized", http.StatusUnauthorized, "Error", "Dont Have Authorization")
 			c.AbortWithStatusJSON(http.StatusUnauthorized, response)
 			return
 		} else {
 			user, err := userServices.GetUsersByID(userId)
 			if err != nil {
-				response := helpers.APIResponse(http.StatusUnauthorized, "Error", "Unauthorized", "Dont Have Authorization")
+				response := helpers.APIResponse("Unauthorized", http.StatusUnauthorized, "Error", "Dont Have Authorization")
 				c.AbortWithStatusJSON(http.StatusUnauthorized, response)
 				return
 			}
