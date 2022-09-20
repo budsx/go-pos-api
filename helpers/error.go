@@ -1,6 +1,8 @@
 package helpers
 
-import "net/http"
+import (
+	"net/http"
+)
 
 type AppError struct {
 	Code    int
