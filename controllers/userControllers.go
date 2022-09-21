@@ -49,11 +49,6 @@ func (controllers *userController) RegisterUser(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, res)
 		return
 	}
-	if err != nil {
-		res := helpers.APIResponse("Register user failed", http.StatusBadRequest, "Error", "Failed create user")
-		c.JSON(http.StatusBadRequest, res)
-		return
-	}
 	userRegist := dto.RegisterInput(newUser, token)
 	response := helpers.APIResponse("Register User success!", http.StatusCreated, "Success", userRegist)
 	c.JSON(http.StatusCreated, response)
