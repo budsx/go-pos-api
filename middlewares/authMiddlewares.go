@@ -29,6 +29,11 @@ func AuthMiddleware(userServices services.UserServices, authService services.Aut
 			return
 		} else {
 			user, err := userServices.GetUsersByID(userId)
+			if user.Role != 1 {
+				response := helpers.APIResponse("Unauthorized", http.StatusUnauthorized, "Error", "Not have permission")
+				c.AbortWithStatusJSON(http.StatusUnauthorized, response)
+				return
+			}
 			if err != nil {
 				response := helpers.APIResponse("Unauthorized", http.StatusUnauthorized, "Error", "Dont Have Authorization")
 				c.AbortWithStatusJSON(http.StatusUnauthorized, response)

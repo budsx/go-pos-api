@@ -87,6 +87,9 @@ func (services *userServices) GetAllUsers() ([]dto.LoginResponse, *helpers.AppEr
 func (services *userServices) GetUsersByID(user_id int) (dto.LoginResponse, *helpers.AppError) {
 	getUser, err := services.userRepository.GetUsersByID(user_id)
 	userResponse := dto.LoginResponse{}
+	if getUser.ID == 0 {
+		return userResponse, helpers.NewNotFoundError("ID NotFound")
+	}
 	if err != nil {
 		return userResponse, err
 	} else {
