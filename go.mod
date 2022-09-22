@@ -1,5 +1,5 @@
 module go-pos-api
-
+// +heroku goVersion go1.18 
 go 1.18
 
 require gorm.io/driver/postgres v1.3.9
