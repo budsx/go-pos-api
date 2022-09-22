@@ -8,7 +8,6 @@ import (
 	"go-pos-api/services"
 
 	"github.com/gin-gonic/gin"
-	"github.com/joho/godotenv"
 )
 
 func main() {
