@@ -45,6 +45,19 @@ func (service *orderService) GetOrderByID(id int) (dto.OrderResponse, *helpers.A
 	if err != nil {
 		return dto.OrderResponse{}, helpers.NewUnexpectedError("Internal Server Error")
 	}
+	productsOrder, err := service.detailOrderRepository.GetDetailOrder(id)
+	orderProductRequest := []dto.OrderProductRequest{}
+	for _, product := range productsOrder {
+		getProduct, _ := service.productRepository.GetProductById(product.ProductID)
+		orderProductRequest = append(orderProductRequest, dto.OrderProductRequest{
+			ProductID:   product.ProductID,
+			Quantity:    product.Quantity,
+			ProductName: getProduct.Name,
+		})
+	}
+	if err != nil {
+		return dto.OrderResponse{}, helpers.NewUnexpectedError("Internal Server Error")
+	}
 	return dto.OrderResponse{
 		OrderID:      order.OrderID,
 		UserID:       order.UserID,
@@ -52,6 +65,7 @@ func (service *orderService) GetOrderByID(id int) (dto.OrderResponse, *helpers.A
 		Amount:       order.Amount,
 		CreatedAt:    order.CreatedAt,
 		UpdatedAt:    order.UpdatedAt,
+		Products:     orderProductRequest,
 	}, nil
 }
 
@@ -85,7 +99,7 @@ func (service *orderService) CreateOrder(request dto.OrderRequest) (dto.OrderRes
 		return dto.OrderResponse{}, helpers.NewBadRequestError("Bad Request Error")
 	} else {
 		for i, product := range request.Products {
-			productDetail, _ := service.productRepository.GetProductById(product.ProductID) 
+			productDetail, _ := service.productRepository.GetProductById(product.ProductID)
 			detailOrder = append(detailOrder, domain.DetailOrder{
 				ProductID: product.ProductID,
 				OrderID:   order.OrderID,
