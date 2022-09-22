@@ -32,18 +32,21 @@ func (service *paymentService) CreatePayment(input dto.CreatePaymentInput) (doma
 		helpers.Error(err.Error())
 		return newPayment, err
 	}
-	// get midtrans url and update transaction before return
-	paymentURL, err := service.midtransService.GetPaymentURL(newPayment)
-	if err != nil {
-		helpers.Error("error" + err.Error())
-		return newPayment, err
-	}
-	newPayment.SnapToken = paymentURL
+	if input.PaymentCategory == "midtrans" {
+		// get midtrans url and update transaction before return
+		paymentURL, err := service.midtransService.GetPaymentURL(newPayment)
+		if err != nil {
+			helpers.Error("error" + err.Error())
+			return newPayment, err
+		}
+		newPayment.SnapToken = paymentURL
 
-	newPayment, err = service.paymentService.UpdatePayment(newPayment)
-	if err != nil {
-		helpers.Error("error" + err.Error())
-		return newPayment, err
+		newPayment, err = service.paymentService.UpdatePayment(newPayment)
+		if err != nil {
+			helpers.Error("error" + err.Error())
+			return newPayment, err
+		}
+		return newPayment, nil
 	}
 	return newPayment, nil
 }

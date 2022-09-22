@@ -52,7 +52,7 @@ func (ms *midtransService) ProcessPayment(input domain.TransactionNotificationFr
 	// get result from midtrans
 	fmt.Println("input13", input)
 	intOrderId, _ := strconv.Atoi(input.OrderID)
-	if input.PaymentType == "bank_transfer" && input.TransactionStatus == "settlement" && input.FraudStatus == "accept" {
+	if input.PaymentType == "credit_card" && input.TransactionStatus == "capture" && input.FraudStatus == "accept" {
 		payment, err := ms.paymentRepository.GetPaymentByOrderIdAndAmount(intOrderId)
 		if err != nil {
 			return err
