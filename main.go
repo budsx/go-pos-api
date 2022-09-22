@@ -18,8 +18,13 @@ func main() {
 	productRepository := repositories.NewProductRepository(db)
 	orderRepository := repositories.NewOrderRepository(db)
 	detailRepository := repositories.NewDetailOrderRepository(db)
+	paymentRepository := repositories.NewPaymentRepository(db)
 
 	orderService := services.NewOrderService(orderRepository, detailRepository, productRepository)
+	midtransService := services.NewMidTransService(paymentRepository)
+	paymentService := services.NewPaymentService(paymentRepository, midtransService)
+
+	paymentController := controllers.NewPaymentController(paymentService, midtransService)
 	orderController := controllers.NewOrderController(orderService)
 	userServices := services.NewUserService(userRepository)
 	authService := services.NewService()
@@ -49,6 +54,10 @@ func main() {
 	router.GET("/orders", authMiddleware, orderController.GetAllOrder)
 	router.GET("/orders/:order_id", authMiddleware, orderController.GetOrderByID)
 	router.POST("/orders", authMiddleware, orderController.CreateOrder)
+
+	// payment router
+	router.POST("/payments", paymentController.CreatePayment)
+	router.POST("/payments/notification", paymentController.GetNotificationFromMidtrans)
 
 	router.Run("localhost:8080")
 }
