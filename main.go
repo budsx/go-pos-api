@@ -13,7 +13,7 @@ import (
 
 func main() {
 	db := config.NewConnection()
-	godotenv.Load()
+	// godotenv.Load()
 	userRepository := repositories.NewUserRepository(db)
 	productRepository := repositories.NewProductRepository(db)
 	orderRepository := repositories.NewOrderRepository(db)
@@ -50,5 +50,5 @@ func main() {
 	router.GET("/orders/:order_id", authMiddleware, orderController.GetOrderByID)
 	router.POST("/orders", authMiddleware, orderController.CreateOrder)
 
-	router.Run("localhost:8080")
+	router.Run()
 }
