@@ -28,6 +28,16 @@ func (service *orderService) GetAllOrder() []dto.OrderResponse {
 
 	var orderResponses []dto.OrderResponse
 	for _, order := range orders {
+		productsOrder, _ := service.detailOrderRepository.GetDetailOrder(order.OrderID)
+		orderProductRequest := []dto.OrderProductRequest{}
+		for _, product := range productsOrder {
+			getProduct, _ := service.productRepository.GetProductById(product.ProductID)
+			orderProductRequest = append(orderProductRequest, dto.OrderProductRequest{
+				ProductID:   product.ProductID,
+				Quantity:    product.Quantity,
+				ProductName: getProduct.Name,
+			})
+		}
 		orderResponses = append(orderResponses, dto.OrderResponse{
 			OrderID:      order.OrderID,
 			UserID:       order.UserID,
@@ -35,6 +45,7 @@ func (service *orderService) GetAllOrder() []dto.OrderResponse {
 			Amount:       order.Amount,
 			CreatedAt:    order.CreatedAt,
 			UpdatedAt:    order.UpdatedAt,
+			Products:     orderProductRequest,
 		})
 	}
 	return orderResponses
