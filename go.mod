@@ -1,8 +1,16 @@
 module go-pos-api
-
+// +heroku goVersion go1.18 
 go 1.18
 
 require gorm.io/driver/postgres v1.3.9
+
+require (
+	github.com/golang-jwt/jwt/v4 v4.4.2 // indirect
+	github.com/joho/godotenv v1.4.0 // indirect
+	go.uber.org/atomic v1.7.0 // indirect
+	go.uber.org/multierr v1.6.0 // indirect
+	go.uber.org/zap v1.23.0 // indirect
+)
 
 require (
 	github.com/gin-contrib/sse v0.1.0 // indirect
