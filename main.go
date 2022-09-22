@@ -21,6 +21,7 @@ func main() {
 	authMiddleware := middlewares.AuthMiddleware(userServices, authService)
 
 	router := gin.Default()
+
 	router.GET("/hello", func(c *gin.Context) {
 		c.JSON(200, gin.H{
 			"message": "Connect Server with Gin Gonic",

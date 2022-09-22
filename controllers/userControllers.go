@@ -49,11 +49,6 @@ func (controllers *userController) RegisterUser(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, res)
 		return
 	}
-	if err != nil {
-		res := helpers.APIResponse("Register user failed", http.StatusBadRequest, "Error", "Failed create user")
-		c.JSON(http.StatusBadRequest, res)
-		return
-	}
 	userRegist := dto.RegisterInput(newUser, token)
 	response := helpers.APIResponse("Register User success!", http.StatusCreated, "Success", userRegist)
 	c.JSON(http.StatusCreated, response)
@@ -101,7 +96,7 @@ func (controllers *userController) GetUsersByID(c *gin.Context) {
 	usersID, _ := strconv.Atoi(usersIdString)
 	users, err := controllers.userServices.GetUsersByID(usersID)
 	if err != nil {
-		response := helpers.APIResponse("GetUsersByID failed", http.StatusInternalServerError, "Error", "Failed GetUsersByID")
+		response := helpers.APIResponse("GetUsersByID failed", http.StatusInternalServerError, "Error", "Failed User ID not found")
 		c.JSON(http.StatusInternalServerError, response)
 		return
 	}
