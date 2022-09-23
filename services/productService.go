@@ -1,7 +1,6 @@
 package services
 
 import (
-	"fmt"
 	"go-pos-api/domain"
 	"go-pos-api/dto"
 	"go-pos-api/helpers"
@@ -115,7 +114,6 @@ func (service *productService) UploadImageProduct(productId int, fileLocation st
 	if err != nil {
 		return product, err
 	}
-	fmt.Println("FIle location", fileLocation)
 	product.ProductImage = fileLocation
 	updatedProduct, err := service.productService.UpdateProductById(product, productId)
 	if err != nil {
