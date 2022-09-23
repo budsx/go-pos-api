@@ -54,7 +54,7 @@ func (controller *orderController) CreateOrder(c *gin.Context) {
 	}
 	order, errs := controller.orderService.CreateOrder(request)
 	if errs != nil {
-		response := helpers.APIResponse("Failed to create new order", http.StatusBadRequest, "Error", nil)
+		response := helpers.APIResponse("Failed to create new order", http.StatusBadRequest, "Error", err.Error())
 		c.JSON(http.StatusBadRequest, response)
 		return
 	} else {

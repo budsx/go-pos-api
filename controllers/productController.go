@@ -35,7 +35,7 @@ func (controller *productController) GetAllProduct(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, response)
 		return
 	}
-	response := helpers.APIResponse("Success Get All Product", http.StatusOK, "error", products)
+	response := helpers.APIResponse("Success Get All Product", http.StatusOK, "success", products)
 	c.JSON(http.StatusOK, response)
 }
 
