@@ -56,5 +56,5 @@ func main() {
 	router.POST("/payments", paymentController.CreatePayment)
 	router.POST("/payments/notification", paymentController.GetNotificationFromMidtrans)
 
-	router.Run("localhost:8080")
+	router.Run()
 }

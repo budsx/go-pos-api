@@ -4,14 +4,13 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/joho/godotenv"
 	_ "github.com/lib/pq"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 )
 
 func NewConnection() *gorm.DB {
-	godotenv.Load()
+	// godotenv.Load()
 	dbUser := os.Getenv("DB_USER")
 	dbPassword := os.Getenv("DB_PASSWORD")
 	dbAddress := os.Getenv("DB_ADDRESS")
