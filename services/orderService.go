@@ -8,8 +8,8 @@ import (
 )
 
 type OrderService interface {
-	GetAllOrder() []dto.OrderResponse
-	GetOrderByID(id int) (dto.OrderResponse, *helpers.AppError)
+	GetAllOrder() []dto.ListOrderAndOrderDetailResponse
+	GetOrderByID(id int) (dto.ListOrderAndOrderDetailResponse, *helpers.AppError)
 	CreateOrder(request dto.OrderRequest) (dto.OrderResponse, *helpers.AppError)
 }
 
@@ -23,60 +23,64 @@ func NewOrderService(orderRepository repositories.OrderRepository, detailOrderRe
 	return &orderService{orderRepository, detailOrderRepository, productRepository}
 }
 
-func (service *orderService) GetAllOrder() []dto.OrderResponse {
+func (service *orderService) GetAllOrder() []dto.ListOrderAndOrderDetailResponse {
 	orders := service.orderRepository.GetAllOrder()
 
-	var orderResponses []dto.OrderResponse
+	var orderResponses []dto.ListOrderAndOrderDetailResponse
 	for _, order := range orders {
 		productsOrder, _ := service.detailOrderRepository.GetDetailOrder(order.OrderID)
-		orderProductRequest := []dto.OrderProductRequest{}
+		productsOrders := []dto.ProductsOrder{}
 		for _, product := range productsOrder {
 			getProduct, _ := service.productRepository.GetProductById(product.ProductID)
-			orderProductRequest = append(orderProductRequest, dto.OrderProductRequest{
+			productsOrders = append(productsOrders, dto.ProductsOrder{
 				ProductID:   product.ProductID,
 				Quantity:    product.Quantity,
 				ProductName: getProduct.Name,
+				Subtotal:    getProduct.Price * product.Quantity,
+				Price:       getProduct.Price,
 			})
 		}
-		orderResponses = append(orderResponses, dto.OrderResponse{
+		orderResponses = append(orderResponses, dto.ListOrderAndOrderDetailResponse{
 			OrderID:      order.OrderID,
 			UserID:       order.UserID,
 			CustomerName: order.CustomerName,
 			Amount:       order.Amount,
 			CreatedAt:    order.CreatedAt,
 			UpdatedAt:    order.UpdatedAt,
-			Products:     orderProductRequest,
+			Products:     productsOrders,
 		})
 	}
 	return orderResponses
 }
 
-func (service *orderService) GetOrderByID(id int) (dto.OrderResponse, *helpers.AppError) {
+func (service *orderService) GetOrderByID(id int) (dto.ListOrderAndOrderDetailResponse, *helpers.AppError) {
 	order, err := service.orderRepository.GetOrderByID(id)
 	if err != nil {
-		return dto.OrderResponse{}, helpers.NewUnexpectedError("Internal Server Error")
+		return dto.ListOrderAndOrderDetailResponse{}, helpers.NewUnexpectedError("Internal Server Error")
 	}
 	productsOrder, err := service.detailOrderRepository.GetDetailOrder(id)
-	orderProductRequest := []dto.OrderProductRequest{}
+	orderProducts := []dto.ProductsOrder{}
 	for _, product := range productsOrder {
 		getProduct, _ := service.productRepository.GetProductById(product.ProductID)
-		orderProductRequest = append(orderProductRequest, dto.OrderProductRequest{
+		orderProducts = append(orderProducts, dto.ProductsOrder{
 			ProductID:   product.ProductID,
-			Quantity:    product.Quantity,
 			ProductName: getProduct.Name,
+			Quantity:    product.Quantity,
+			Price:       getProduct.Price,
+			Subtotal:    getProduct.Price * product.Quantity,
 		})
 	}
 	if err != nil {
-		return dto.OrderResponse{}, helpers.NewUnexpectedError("Internal Server Error")
+		return dto.ListOrderAndOrderDetailResponse{}, helpers.NewUnexpectedError("Internal Server Error")
 	}
-	return dto.OrderResponse{
+	return dto.ListOrderAndOrderDetailResponse{
 		OrderID:      order.OrderID,
 		UserID:       order.UserID,
 		CustomerName: order.CustomerName,
 		Amount:       order.Amount,
 		CreatedAt:    order.CreatedAt,
 		UpdatedAt:    order.UpdatedAt,
-		Products:     orderProductRequest,
+		Products:     orderProducts,
 	}, nil
 }
 
