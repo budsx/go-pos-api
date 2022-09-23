@@ -43,7 +43,7 @@ func main() {
 	router.DELETE("/users/:user_id", authMiddleware, userController.DeleteUser)
 
 	router.GET("/products", productController.GetAllProduct)
-	router.GET("/products/:product_id", productMiddleware, productController.GetProductById)
+	router.GET("/products/:product_id", productController.GetProductById)
 	router.DELETE("/products/:product_id", productMiddleware, productController.DeleteProductById)
 	router.PUT("/products/:product_id", productMiddleware, productController.UpdateProductById)
 	router.POST("/products", productMiddleware, productController.CreateProduct)
@@ -53,7 +53,6 @@ func main() {
 	router.GET("/orders/:order_id", orderMiddleware, orderController.GetOrderByID)
 	router.POST("/orders", orderMiddleware, orderController.CreateOrder)
 
-	// payment router
 	router.POST("/payments", paymentController.CreatePayment)
 	router.POST("/payments/notification", paymentController.GetNotificationFromMidtrans)
 
