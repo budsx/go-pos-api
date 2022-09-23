@@ -65,7 +65,7 @@ func (controllers *userController) LoginUser(c *gin.Context) {
 	}
 	loginUser, errLogin := controllers.userServices.LoginUser(request)
 	if errLogin != nil {
-		res := helpers.APIResponse("Login user failed", http.StatusBadRequest, "Error", "Wrong Password")
+		res := helpers.APIResponse("Login user failed", http.StatusBadRequest, "Error", "No account found")
 		c.JSON(http.StatusBadRequest, res)
 		return
 	}

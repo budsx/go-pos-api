@@ -8,12 +8,10 @@ import (
 	"go-pos-api/services"
 
 	"github.com/gin-gonic/gin"
-	"github.com/joho/godotenv"
 )
 
 func main() {
 	db := config.NewConnection()
-	godotenv.Load()
 	userRepository := repositories.NewUserRepository(db)
 	productRepository := repositories.NewProductRepository(db)
 	orderRepository := repositories.NewOrderRepository(db)
@@ -32,6 +30,8 @@ func main() {
 	productController := controllers.NewProductController(productService)
 	userController := controllers.NewUserController(userServices, authService)
 	authMiddleware := middlewares.AuthMiddleware(userServices, authService)
+	productMiddleware := middlewares.ProductMiddleware(userServices, authService)
+	orderMiddleware := middlewares.OrderMiddleware(userServices, authService)
 
 	router := gin.Default()
 
@@ -42,20 +42,17 @@ func main() {
 	router.PUT("/users/:user_id", authMiddleware, userController.UpdateUser)
 	router.DELETE("/users/:user_id", authMiddleware, userController.DeleteUser)
 
-	// product router
-	router.GET("/products", authMiddleware, productController.GetAllProduct)
-	router.GET("/products/:product_id", authMiddleware, productController.GetProductById)
-	router.DELETE("/products/:product_id", authMiddleware, productController.DeleteProductById)
-	router.PUT("/products/:product_id", authMiddleware, productController.UpdateProductById)
-	router.POST("/products", authMiddleware, productController.CreateProduct)
+	router.GET("/products", productController.GetAllProduct)
+	router.GET("/products/:product_id", productController.GetProductById)
+	router.DELETE("/products/:product_id", productMiddleware, productController.DeleteProductById)
+	router.PUT("/products/:product_id", productMiddleware, productController.UpdateProductById)
+	router.POST("/products", productMiddleware, productController.CreateProduct)
 	router.POST("/products-image/:product_id", productController.UploadImageProduct)
 
-	// order router
-	router.GET("/orders", authMiddleware, orderController.GetAllOrder)
-	router.GET("/orders/:order_id", authMiddleware, orderController.GetOrderByID)
-	router.POST("/orders", authMiddleware, orderController.CreateOrder)
+	router.GET("/orders", orderMiddleware, orderController.GetAllOrder)
+	router.GET("/orders/:order_id", orderMiddleware, orderController.GetOrderByID)
+	router.POST("/orders", orderMiddleware, orderController.CreateOrder)
 
-	// payment router
 	router.POST("/payments", paymentController.CreatePayment)
 	router.POST("/payments/notification", paymentController.GetNotificationFromMidtrans)
 
