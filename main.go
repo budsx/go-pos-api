@@ -7,6 +7,7 @@ import (
 	"go-pos-api/repositories"
 	"go-pos-api/services"
 
+	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 )
 
@@ -34,6 +35,7 @@ func main() {
 	orderMiddleware := middlewares.OrderMiddleware(userServices, authService)
 
 	router := gin.Default()
+	router.Use(cors.Default())
 
 	router.POST("/users", authMiddleware, userController.RegisterUser)
 	router.POST("/login", userController.LoginUser)
